@@ -3118,6 +3118,35 @@ error:
 }
 
 /*
+ * Command LTTNG_LIST_EVENT_FILTER processed by the client thread.
+ */
+int cmd_list_event_filter(int domain, const char *event_name,
+		struct lttng_event_filter_expr **filter)
+{
+	int ret;
+
+	switch (domain) {
+	case LTTNG_DOMAIN_UST:
+		nb_fields = ust_app_list_event_fields(fields);
+		if (nb_fields < 0) {
+			ret = LTTNG_ERR_UST_LIST_FAIL;
+			goto error;
+		}
+		break;
+	case LTTNG_DOMAIN_KERNEL:
+	default:	/* fall-through */
+		ret = LTTNG_ERR_UND;
+		goto error;
+	}
+
+	return 0;
+
+error:
+	/* Return negative value to differentiate return code */
+	return -ret;
+}
+
+/*
  * Init command subsystem.
  */
 void cmd_init(void)

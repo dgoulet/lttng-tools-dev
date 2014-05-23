@@ -2781,6 +2781,7 @@ static int process_client_msg(struct command_ctx *cmd_ctx, int sock,
 	case LTTNG_LIST_DOMAINS:
 	case LTTNG_LIST_CHANNELS:
 	case LTTNG_LIST_EVENTS:
+	case LTTNG_LIST_EVENT_FILTER:
 		break;
 	default:
 		/* Setup lttng message with no payload */
@@ -3206,6 +3207,35 @@ skip_domain:
 				cmd_ctx->lsm->u.enable.channel_name,
 				cmd_ctx->lsm->u.enable.event.type, NULL, NULL,
 				kernel_poll_pipe[1]);
+		break;
+	}
+	case LTTNG_LIST_EVENT_FILTER:
+	{
+		struct lttng_event_filter_expr *filter;
+
+		ret = cmd_list_event_filter(cmd_ctx->lsm->domain.type,
+				cmd_ctx->lsm->list_event.event_name, &filter);
+		if (ret < 0) {
+			/* Return value is a negative lttng_error_code. */
+			ret = -ret;
+			goto error;
+		}
+
+		/*
+		 * Setup lttng message with payload size set to the event list size in
+		 * bytes and then copy list into the llm payload.
+		 */
+		ret = setup_lttng_msg(cmd_ctx, sizeof(*filter) + filter->len);
+		if (ret < 0) {
+			free(filters);
+			goto setup_error;
+		}
+
+		/* Copy event list into message payload */
+		memcpy(cmd_ctx->llm->payload, filter, sizeof(*filter) + filter->len);
+		free(filter);
+
+		ret = LTTNG_OK;
 		break;
 	}
 	case LTTNG_LIST_TRACEPOINTS:

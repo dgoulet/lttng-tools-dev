@@ -1667,6 +1667,27 @@ end:
 	return ret;
 }
 
+int lttng_list_event_filter(struct lttng_handle *handle,
+		const char *event_name, struct lttng_event_filter_expr **filter)
+{
+	struct lttcomm_session_msg lsm;
+
+	if (!handle || !filter || !event_name) {
+		return -LTTNG_ERR_INVALID;
+	}
+
+	memset(&lsm, 0, sizeof(lsm));
+	lsm.cmd_type = LTTNG_LIST_EVENT_FILTER;
+
+	lttng_ctl_copy_string(lsm.session.name, handle->session_name,
+			sizeof(lsm.session.name));
+	lttng_ctl_copy_lttng_domain(&lsm.domain, &handle->domain);
+	lttng_ctl_copy_string(lsm.list_event.event_name, event_name,
+			sizeof(lsm.list_event.event_name));
+
+	return lttng_ctl_ask_sessiond(&lsm, (void **) filter);
+}
+
 /*
  * lib constructor
  */

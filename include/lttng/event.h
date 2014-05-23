@@ -251,6 +251,14 @@ extern int lttng_list_tracepoints(struct lttng_handle *handle,
 extern int lttng_list_tracepoint_fields(struct lttng_handle *handle,
 		struct lttng_event_field **fields);
 
+struct lttng_event_filter_expr {
+	size_t len;
+	unsigned char expr[];
+};
+
+extern int lttng_list_event_filter(struct lttng_handle *handle,
+		const char *event_name, struct lttng_event_filter_expr *filter);
+
 /*
  * Add context to event(s) for a specific channel (or for all).
  *

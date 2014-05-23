@@ -81,7 +81,7 @@ enum lttcomm_sessiond_command {
 	LTTNG_DISABLE_CONSUMER              = 19,
 	LTTNG_ENABLE_CONSUMER               = 20,
 	LTTNG_SET_CONSUMER_URI              = 21,
-	/* 22 */
+	LTTNG_LIST_EVENT_FILTER             = 22,
 	/* 23 */
 	LTTNG_DATA_PENDING                  = 24,
 	LTTNG_SNAPSHOT_ADD_OUTPUT           = 25,
@@ -286,6 +286,9 @@ struct lttcomm_session_msg {
 		struct {
 			struct lttng_save_session_attr attr; /* struct already packed */
 		} LTTNG_PACKED save_session;
+		struct {
+			char event_name[LTTNG_SYMBOL_NAME_LEN];
+		} LTTNG_PACKED list_event;
 	} u;
 } LTTNG_PACKED;
 
